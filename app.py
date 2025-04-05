@@ -25,10 +25,11 @@ def convert_regex():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Optional: explicitly serve image route
 @app.route("/static/<path:filename>")
 def serve_static(filename):
     return send_from_directory("static", filename)
 
+# ✅ FOR RENDER DEPLOYMENT — USE 0.0.0.0 + PORT from env
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
