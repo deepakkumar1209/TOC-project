@@ -33,3 +33,8 @@ def serve_static(filename):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+import os
+import graphviz
+
+print("DOT PATH CHECK:", os.system("which dot"))
+print("PATH:", os.environ.get("PATH"))
