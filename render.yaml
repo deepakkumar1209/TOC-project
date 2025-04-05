@@ -1,5 +1,11 @@
 services:
   - type: web
-    name: toc-project
+    name: toc-graphviz-backend
     env: docker
     plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: '1'
+    autoDeploy: true

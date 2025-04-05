@@ -38,3 +38,6 @@ import graphviz
 
 print("DOT PATH CHECK:", os.system("which dot"))
 print("PATH:", os.environ.get("PATH"))
+import shutil
+print("GRAPHVIZ PATH:", shutil.which("dot"))  # should not be None
+

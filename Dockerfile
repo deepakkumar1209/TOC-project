@@ -1,21 +1,20 @@
-# Use official Python image
-FROM python:3.10-slim
+# Use official Python slim image
+FROM python:3.11-slim
 
-# Install Graphviz system dependencies
+# Install graphviz system package
 RUN apt-get update && apt-get install -y graphviz
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
-# Copy all files
+# Copy everything to container
 COPY . .
 
 # Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port your app runs on
+# Expose your Flask port
 EXPOSE 10000
 
-# Run the app
+# Run your app
 CMD ["python", "app.py"]
