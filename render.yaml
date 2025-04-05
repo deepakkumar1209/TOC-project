@@ -1,7 +1,10 @@
 services:
   - type: web
-    name: regex-backend
+    name: toc-project
     env: python
-    buildCommand: ""
-    startCommand: python app.py
     plan: free
+    buildCommand: "pip install -r requirements.txt && apt-get update && apt-get install -y graphviz"
+    startCommand: "python app.py"
+    envVars:
+      - key: PORT
+        value: 10000
