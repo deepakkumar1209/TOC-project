@@ -1,21 +1,19 @@
-# Dockerfile
+FROM python:3.11-slim
 
-FROM python3.11-slim
-
-# Install Graphviz
+# Install Graphviz and dependencies
 RUN apt-get update && apt-get install -y graphviz
 
-# Set work directory
-WORKDIR app
+# Set working directory
+WORKDIR /app
 
-# Copy all files to container
+# Copy everything to the container
 COPY . .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port
+# Expose port
 EXPOSE 10000
 
-# Start your Flask app
-CMD [python, app.py]
+# Start the app
+CMD ["python", "app.py"]

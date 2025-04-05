@@ -1,7 +1,6 @@
-# render.yaml
-
 services:
   - type: web
     name: toc-project
     env: docker
     plan: free
+    dockerfilePath: ./Dockerfile
