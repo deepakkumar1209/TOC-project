@@ -1,0 +1,27 @@
+name: Update Figma Embed
+
+on:
+  schedule:
+    # every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # allows manual trigger
+
+jobs:
+  update-figma:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install node-fetch firebase-admin
+
+      - name: Run updateFigma.js
+        run: node updateFigma.js
+        env:
+          FIGMA_PERSONAL_TOKEN: ${{ secrets.FIGMA_PERSONAL_TOKEN }}
