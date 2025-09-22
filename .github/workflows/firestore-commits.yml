@@ -1,42 +1,51 @@
-name: Push commits to Firestore
+name: Push Commits to Firestore
 
 on:
   push:
     branches:
-      - main   # change if you use a different branch
+      - main  # Trigger on main branch commits
 
 jobs:
   update-firestore:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          node-version: 18
 
-      - name: Push commit info to Firestore
+      - name: Install dependencies
+        run: npm install firebase-admin
+
+      - name: Push commit to Firestore
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
         run: |
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
-          COMMIT_URL="${{ github.event.head_commit.url }}"
-          COMMIT_TIME="${{ github.event.head_commit.timestamp }}"
+          node -e "
+          const admin = require('firebase-admin');
+          const commits = require('child_process')
+            .execSync('git log -1 --pretty=format:\"%H|%an|%s|%cI\"')
+            .toString()
+            .split('|');
+          
+          admin.initializeApp({
+            credential: admin.credential.cert({
+              projectId: process.env.FIREBASE_PROJECT_ID,
+              clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+              privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            })
+          });
 
-          ACCESS_TOKEN=$(gcloud auth print-access-token)
-
-          curl -X POST \
-            -H "Authorization: Bearer $ACCESS_TOKEN" \
-            -H "Content-Type: application/json" \
-            "https://firestore.googleapis.com/v1/projects/smart-client-b8b1c/databases/(default)/documents/commits" \
-            -d "{
-              \"fields\": {
-                \"message\": {\"stringValue\": \"$COMMIT_MSG\"},
-                \"author\": {\"stringValue\": \"$COMMIT_AUTHOR\"},
-                \"url\": {\"stringValue\": \"$COMMIT_URL\"},
-                \"timestamp\": {\"timestampValue\": \"$COMMIT_TIME\"}
-              }
-            }"
+          const db = admin.firestore();
+          db.collection('commits').doc(commits[0]).set({
+            id: commits[0],
+            author: commits[1],
+            message: commits[2],
+            url: 'https://github.com/${{ github.repository }}/commit/' + commits[0],
+            timestamp: new Date(commits[3])
+          }).then(() => console.log('Commit pushed to Firestore'));
+          "
